@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 bs4 = "*"
 requests = "*"
+rarfile = "*"
 
 [requires]
 python_version = "3.7"

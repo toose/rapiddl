@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "dd4ac29a565a87289ea1d1f0daa29d2f7310a1f5799f2877e58d2603e689b706"
+            "sha256": "66e5c1f8b31ded454b5db21b3fd08d7a89f8993203b7796e0352d682530e4fc2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -51,6 +51,13 @@
                 "sha256:ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"
             ],
             "version": "==2.8"
+        },
+        "rarfile": {
+            "hashes": [
+                "sha256:e816409e3b36794507cbe0b678bed3e4703d7412c5f7f9201a510ed6fdc66c35"
+            ],
+            "index": "pypi",
+            "version": "==3.0"
         },
         "requests": {
             "hashes": [
