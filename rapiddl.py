@@ -6,9 +6,9 @@ import threading, argparse, requests, os, rarfile, uuid, shutil, logging
 
 def get(session, link, path):
     filename = link.split('/')[-1]
-    response = session.get(link, allow_redirects=True)
-    with open(os.path.join(path, filename), 'wb') as file:
-        file.write(response.content)
+    with session.get(link, allow_redirects=True, stream=True) as response:
+        with open(os.path.join(path, filename), 'wb') as file:
+            file.write(response.content)
 
 def extract(file, path, video_formats):
     if file[-4:] == '.rar':
@@ -74,15 +74,20 @@ def main():
         logger.info('Downloading complete')
     files = os.listdir(staging_path)
     files.sort()
+    # Rename any files ending in '.html'
+    if files[0][-5:] == '.html':
+        for file in files:
+            os.rename(os.path.join(staging_path, file),
+                        os.path.join(staging_path, file[:-5]))
+        files = os.listdir(staging_path)
+        files.sort()
+    # Extract archives
     if files[0][-4:] in ['.rar']:
         file = extract(files[0], staging_path, video_formats)
         logger.info('File extraction complete')
+    # Move files that do not need to be decompressed
     elif files[0][-4:] in video_formats:
         file = os.path.join(staging_path, files[0])
-    elif files[0][-5:] == '.html':
-        os.rename(os.path.join(staging_path, files[0]), 
-                  os.path.join(staging_path, files[0][:-5]))
-        file = os.path.join(staging_path, files[0][:-5])
     shutil.move(file, args.dest)
     logger.info('File moved successfully')
     shutil.rmtree(staging_path)
