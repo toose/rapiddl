@@ -36,7 +36,7 @@ def get(session, path, link, index=None):
 def extract(file, path, video_formats):
     video_files = []
     if file[-4:] == '.rar':
-        with rarfile.RarFile(os.path.join(path, file)) as rf:
+        with rarfile.RarFile(os.path.join(path, file), crc_check=False) as rf:
             for rar_file in rf.infolist():
                 if rar_file.filename[-4:] in video_formats:
                     rf.extract(rar_file, path=path)
@@ -71,11 +71,12 @@ def verify(staging_path, files):
     Returns:
         A list of files.
     '''
-    if files[0][1:5] != files[1][1:5]:
-        for i, file in enumerate(files):
-            os.rename(os.path.join(staging_path, file), 
-                        os.path.join(staging_path, 'download.part{}.rar'.format(i + 1)))
-        files = os.listdir(staging_path)
+    #if files[0][1:5] != files[1][1:5]:
+    files.sort()
+    for i, file in enumerate(files):
+        os.rename(os.path.join(staging_path, file), 
+                    os.path.join(staging_path, 'download.part{}.rar'.format(i + 1)))
+    files = os.listdir(staging_path)
     return files
 
 def main():
@@ -132,7 +133,7 @@ def main():
     zip_formats = ['.rar']
     staging_path = os.path.join(os.getcwd(), 'staging', str(uuid.uuid4()))
     make_staging(staging_path)
-    logger.info('Staging path created')
+    logger.info('Staging path: {}'.format(staging_path))
     with requests.Session() as session:
         post = session.post(LOGIN_URL, data=LOGIN_PAYLOAD)
         logger.info('Authentication successful')
@@ -151,6 +152,7 @@ def main():
     files.sort()
     if len(files) > 1:
         files = verify(staging_path, os.listdir(staging_path))
+        files.sort()
     # Extract archives
     if files[0][-4:] in zip_formats:
         video_files = extract(files[0], staging_path, video_formats)
