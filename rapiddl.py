@@ -8,7 +8,7 @@ def get(session, path, link, index=None):
     '''Retrieves content from RapidGator.net
     
     Downloads a file from RapidGator. If there are multiple links
-    to download content from, we prepend an index number to the
+    to download content from, prepend an index number to the
     filename so we can decompress the files in the correct order
     later in the script.
 
@@ -34,13 +34,14 @@ def get(session, path, link, index=None):
                     file.write(chunk)
 
 def extract(file, path, video_formats):
+    video_files = []
     if file[-4:] == '.rar':
         with rarfile.RarFile(os.path.join(path, file)) as rf:
             for rar_file in rf.infolist():
                 if rar_file.filename[-4:] in video_formats:
                     rf.extract(rar_file, path=path)
-                    video_file = os.path.join(path, rar_file.filename)
-    return video_file
+                    video_files.append(os.path.join(path, rar_file.filename))
+    return video_files
 
 def make_staging(path):
     staging_dir = os.path.split(path)[0]
@@ -142,17 +143,23 @@ def main():
         files = verify(staging_path, os.listdir(staging_path))
     # Extract archives
     if files[0][-4:] in zip_formats:
-        file = extract(files[0], staging_path, video_formats)
+        video_files = extract(files[0], staging_path, video_formats)
         logger.info('File extraction complete')
     # Move files that do not need to be decompressed
     elif files[0][-4:] in video_formats:
-        file = os.path.join(staging_path, files[0])
-    if args.filename:
-        filename = "{}.{}".format(args.filename, file[-3:])
-        logger.info('File renamed')
-        shutil.move(file, os.path.join(args.dest, filename))
-    else:
-        shutil.move(file, args.dest)
+        video_files = [os.path.join(staging_path, files[0])]
+    for index, file in enumerate(video_files):
+        if args.filename:
+            # If args.filename is provided and there are multiple videos, 
+            # append an index number so as not to overwrite each new file
+            # while moving them.
+            if len(video_files) > 1:
+                filename = "{}.{}".format(args.filename + str(index + 1), file[-3:])
+            else:
+                filename = "{}.{}".format(args.filename, file[-3:])
+            shutil.move(file, os.path.join(args.dest, filename))
+        else:
+            shutil.move(file, args.dest)
     logger.info('File moved successfully')
     shutil.rmtree(staging_path)
     logger.info('Staging folder removed')
