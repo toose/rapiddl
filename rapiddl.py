@@ -80,8 +80,9 @@ def verify(staging_path, files):
 
 def main():
     parser = argparse.ArgumentParser(description='Rapidgator downloader')
-    parser.add_argument('-l', '--link', required=True, nargs='+')
+    parser.add_argument('-l', '--link', nargs='+')
     parser.add_argument('-d', '--dest', required=True)
+    parser.add_argument('-f', '--file')
     parser.add_argument('-n', '--filename')
     parser.add_argument('-u', '--username')
     parser.add_argument('-p', '--password')
@@ -117,6 +118,15 @@ def main():
         else:
             raise FileNotFoundError('Authentication file not found')
 
+    # Args.file represents a file with a list of links within
+    if args.file:
+        links = []
+        with open(args.file, 'r') as file:
+            for line in file:
+                links.append(line.rstrip('\n'))
+    else:
+        links = args.link
+
     threads = []
     video_formats = ['.mkv','.mp4']
     zip_formats = ['.rar']
@@ -126,8 +136,8 @@ def main():
     with requests.Session() as session:
         post = session.post(LOGIN_URL, data=LOGIN_PAYLOAD)
         logger.info('Authentication successful')
-        for index, link in enumerate(args.link):
-            if len(args.link) == 1:
+        for index, link in enumerate(links):
+            if len(links) == 1:
                 index = None
             thread = threading.Thread(target=get, 
                 args=(session, staging_path, link, index))
