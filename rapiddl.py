@@ -147,7 +147,7 @@ def main():
             logger.info('Downloading file from {}'.format(link))
         for thread in threads:
             thread.join()
-        logger.info('Downloading complete')
+        logger.info('Download complete')
     files = os.listdir(staging_path)
     files.sort()
     if len(files) > 1:
@@ -173,8 +173,9 @@ def main():
         else:
             shutil.move(file, args.dest)
     logger.info('File moved successfully')
-    shutil.rmtree(staging_path)
-    logger.info('Staging folder removed')
+    logger.info('END')
+    #shutil.rmtree(staging_path)
+    #logger.info('Staging folder removed')
 
 if __name__ == '__main__':
     main()
