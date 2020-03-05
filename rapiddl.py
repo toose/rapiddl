@@ -71,7 +71,6 @@ def verify(staging_path, files):
     Returns:
         A list of files.
     '''
-    #if files[0][1:5] != files[1][1:5]:
     files.sort()
     for i, file in enumerate(files):
         os.rename(os.path.join(staging_path, file), 
@@ -158,7 +157,7 @@ def main():
         video_files = extract(files[0], staging_path, video_formats)
         logger.info('File extraction complete')
     # Move files that do not need to be decompressed
-    elif files[0][-4:] in video_formats:
+    elif files[0][-4:] in video_formeats:
         video_files = [os.path.join(staging_path, files[0])]
     for index, file in enumerate(video_files):
         if args.filename:
