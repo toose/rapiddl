@@ -1,2 +1,6 @@
 # Auth file
 /auth
+
+# pycache dirs
+__pycache__/
+/rapiddl/__pycache__
