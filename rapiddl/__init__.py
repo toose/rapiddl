@@ -52,11 +52,10 @@ class Rapidgator(Downloader):
         self.token = token
         self.threads = []
         self.file_handler = file_handler
-        self.file_handler.make_staging()
         super().__init__(self.file_handler, self.token)
 
     def _get(self, link, session):
-        """Called inside each thread.
+        """Worker function called inside each thread.
     
         Args:
             link (str): the link to download.
@@ -65,7 +64,7 @@ class Rapidgator(Downloader):
         file_name = link.split('/')[-1]
         with session.get(link, allow_redirects=True, stream=True) as response:
             with open(os.path.join(
-                self.file_handler.staging_path), file_name) as file:
+                self.file_handler.staging_path, file_name), 'wb') as file:
                     for chunk in response.iter_content(chunk_size=1024):
                         if chunk:
                             file.write(chunk)
@@ -77,18 +76,19 @@ class Rapidgator(Downloader):
             link (str): a rapidgator url.
             token (str): used to authenticate the get method with
                 rapidgator.
+
         Returns:
             session: requests.Session object.
         """
         if token is None:
             token = self.token
         with requests.Session() as session:
-            response = session.post(self.url, token)
+            response = session.post(self.auth_url, token)
             for link in links:
                 thread = threading.Thread(
                     target=_get, args=(link, ))
                 self.threads.append(thread)
-                thread.start()        
+                thread.start()
 
     def wait(self):
         """Wait for all threads to finish processesing"""
@@ -131,7 +131,15 @@ class FileExtracter():
 
 
 def main():
-    pass
+    token = {'LoginForm[email]': 'metsfan2152@gmail.com',
+             'LoginForm[password]': 'Wogman2152'}
+    destination_path = 'c:\\temp\\dl'
+    link = 'https://rapidgator.net/file/21f84529c90684a59903b7cd9d8a72b1/Spaceballs.1987.1080p.BluRay.x264.YIFY.mp4.html'
+
+    fh = FileHandler(destination_path, None)
+    rg = Rapidgator(fh, token)
+    rg.get(link)
+    rg.wait()
 
 if __name__ == '__main__':
     main()

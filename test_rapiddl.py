@@ -1,4 +1,4 @@
-import unittest
+import unittest, requests
 from unittest import mock
 from rapiddl import Rapidgator, FileHandler
 from tempfile import TemporaryDirectory, TemporaryFile
@@ -12,10 +12,11 @@ class TestRapidgator(unittest.TestCase):
                       'https://example.com/some-file.part2.rar']
         
         self.mock_file_handler = mock.create_autospec(FileHandler)
+        self.mock_file_handler.staging_path = '/tmp/staging/'
         self.rg = Rapidgator(self.mock_file_handler, token=self.token)
 
     def test_no_token_raises_exception(self):
-        '''Raises an exception when no token is provided'''
+        """Raises an exception when no token is provided"""
         self.assertRaises(ValueError, Rapidgator, self.mock_file_handler)
 
     @mock.patch('rapiddl.Rapidgator.get')
@@ -25,9 +26,20 @@ class TestRapidgator(unittest.TestCase):
             self.rg.get(link)
             mock_get.assert_called_with(link)
 
-        
+    @mock.patch('rapiddl.Rapidgator.wait')
+    def test_wait_method_calls_thread_wait(self, mock_wait):
+        """"""
+        self.rg.wait()
+        mock_wait.assert_called_once()
     
-
+    @mock.patch('rapiddl.open')
+    def test__get_method_calls_session_get(self, mock_open):
+        """_get method should call session.get twice"""
+        mock_session = mock.create_autospec(requests.Session)
+        for link in self.links:
+            self.rg._get(link, mock_session)
+        self.assertEqual(mock_session.get.call_count, 2)
+        self.assertEqual(mock_open.call_count, 2)
 
 
 class TestFileHandler(unittest.TestCase):
@@ -38,13 +50,13 @@ class TestFileHandler(unittest.TestCase):
     @mock.patch('rapiddl.os.mkdir')
     @mock.patch('rapiddl.uuid.uuid4', return_value='b75bc907-c056-4e82-b015-c9851075721e')
     def test_make_staging(self, mock_uuid4, mock_mkdir, mock_exists):
-        self.file_handler._make_staging()
+        self.file_handler.make_staging()
         mock_uuid4.assert_called_once()
         mock_mkdir.assert_called_once()
 
     @mock.patch('rapiddl.os.rmdir')
     def test_remove_staging(self, mock_rmdir):
-        self.file_handler._remove_staging()
+        self.file_handler.remove_staging()
         mock_rmdir.assert_called_once()
 
 
