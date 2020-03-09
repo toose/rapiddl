@@ -12,6 +12,9 @@ Supported extraction file types:
 # Installation
 
 # Usage
+Token should be in the form:
+
+    {'LoginForm[email]': email@gmail.com', 'LoginForm[password]': 'PasswordHere'}
 
 # Release History
 
