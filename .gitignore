@@ -4,3 +4,6 @@
 # pycache dirs
 __pycache__/
 /rapiddl/__pycache__
+
+# unittest .coverage file
+.coverage

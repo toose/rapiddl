@@ -82,6 +82,16 @@ class TestFileHandler(unittest.TestCase):
         with self.assertRaises(FileNotFoundError) as exception:
             self.file_handler.make_staging(path).should_raise()
 
+    def test_is_compressed_method(self):
+        """Tests if files are compressed via the extension"""
+        zip_file = 'important-documents.zip'
+        result = self.file_handler.is_compressed(zip_file)
+        self.assertEqual(result, True)
+
+        txt_file = 'other-document.txt'
+        result = self.file_handler.is_compressed(txt_file)
+        self.assertEqual(result, False)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -18,6 +18,7 @@ class Downloader():
     def __init__(self, file_handler, token=None):
         self.token = token
         self.file_handler = file_handler
+        self.threads = []
         if self.token is None:
             raise ValueError("token parameter must be supplied.")
 
@@ -40,10 +41,7 @@ class Rapidgator(Downloader):
                      remote server
     """
     def __init__(self, file_handler, token=None):
-        self.token = token
-        self.file_handler = file_handler
         self.auth_url = 'https://rapidgator.net/auth/login'
-        self.threads = []
         super().__init__(self.file_handler, self.token)
         
     def _get(self, link, session):
@@ -101,16 +99,23 @@ class Rapidgator(Downloader):
 
 
 class FileHandler():
-    """A file handler object, capable to saving files to disk.
+    """A file handler object to saving files to disk.
     
     Args:
-        path (str): The destination path to save the file.
-        file_extractor (obj): Object capable of extracting files.
+        path (str): the destination path to save the file.
+        file_extractor (obj): object capable of extracting files.
     """
-    def __init__(self, path, file_extracter):
+    def __init__(self, path, file_extractor):
         self.path = path
-        self.file_extracter  = file_extracter
+        self.file_extractor = file_extractor
         self.staging_path = self.make_staging()
+
+    def is_compressed(self, file):
+        compression_formats = ['.rar.', '.zip', '.7z']
+        if file[-4:] in compression_formats:
+            return True
+        return False
+
 
     def make_staging(self, path=None):
         """Creates the staging path.
@@ -135,12 +140,16 @@ class FileHandler():
 
 
 class FileExtracter():
-    pass
+    def __init__():
+        pass
+
+    def extract():
+        pass
 
 
 def main():
     token = {'LoginForm[email]': 'metsfan2152@gmail.com',
-             'LoginForm[password]': 'NotThePassword'}
+             'LoginForm[password]': 'Wogman2152'}
     destination_path = '/tmp/staging'
     link = 'https://rapidgator.net/file/21f84529c90684a59903b7cd9d8a72b1/Spaceballs.1987.1080p.BluRay.x264.YIFY.mp4.html'
 
@@ -148,10 +157,12 @@ def main():
     rg = Rapidgator(fh, token)
     rg.get(link)
     rg.wait()
+    
+    for file in os.listdir(rg.file_handler.staging_path):
+        if rg.file_handler.is_compressed(file):
+            rg.file_handler
 
-
-
-    # clean up 
+    # clean up
     rg.file_handler.remove_staging()
 
 if __name__ == '__main__':
