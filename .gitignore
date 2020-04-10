@@ -7,3 +7,6 @@ __pycache__/
 
 # unittest .coverage file
 .coverage
+
+# staging folder for testing
+/staging
